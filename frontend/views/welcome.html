@@ -1,0 +1,140 @@
+<!-- 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/styles.css">
+    <title>Welcome</title>
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome</h1>
+        <img id="profilePic" alt="Profile Picture" class="profile-pic">
+        <div id="userDetails" class="user-details">
+            <div class="detail-row"><strong>First Name:</strong> <span id="firstName"></span> <button class="edit-btn" onclick="editField('firstName')">Edit</button></div>
+            <div class="detail-row"><strong>Last Name:</strong> <span id="lastName"></span> <button class="edit-btn" onclick="editField('lastName')">Edit</button></div>
+            <div class="detail-row"><strong>Email:</strong> <span id="email"></span> <button class="edit-btn" onclick="editField('email')">Edit</button></div>
+            <div class="detail-row"><strong>Date of Birth:</strong> <span id="dateOfBirth"></span> <button class="edit-btn" onclick="editField('dateOfBirth')">Edit</button></div>
+            <div class="detail-row"><strong>Password:</strong> <span id="password"></span> <button class="edit-btn" onclick="editField('password')">Edit</button></div>
+        </div>
+        <button onclick="window.location.href='login.html'">Logout</button>
+    </div>
+    
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const userId = urlParams.get('userId');
+        const firstName = urlParams.get('firstName');
+        const lastName = urlParams.get('lastName');
+        const email = urlParams.get('email');
+        const dateOfBirth = urlParams.get('dateOfBirth');
+        const password = decodeURIComponent(urlParams.get('password'));
+        const profilePic = urlParams.get('profilePic');
+        
+        document.getElementById('firstName').innerText = firstName;
+        document.getElementById('lastName').innerText = lastName;
+        document.getElementById('email').innerText = email;
+        document.getElementById('dateOfBirth').innerText = new Date(dateOfBirth).toLocaleDateString();
+        document.getElementById('password').innerText = password;
+        
+        const profilePicElement = document.getElementById('profilePic');
+        profilePicElement.onerror = function() {
+            profilePicElement.src = 'path_to_default_image.png'; // Placeholder image path
+        };
+        profilePicElement.src = `/uploads/${profilePic}`;
+    </script>
+</body>
+</html> -->
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/styles.css">
+    <title>Welcome</title>
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome</h1>
+        <div class="profile-pic-container">
+            <img id="profilePic" alt="Profile Picture" class="profile-pic">
+            <button class="edit-btn profile-pic-btn" onclick="document.getElementById('profilePicInput').click()">Edit</button>
+        </div>
+        <input type="file" id="profilePicInput" accept="image/png, image/jpeg" style="display: none;" onchange="uploadProfilePic()">
+        <div id="userDetails" class="user-details">
+            <div class="detail-row"><strong>First Name:</strong><span id="firstName"></span><button class="edit-btn" onclick="editField('firstName')">Edit</button></div>
+            <div class="detail-row"><strong>Last Name:</strong><span id="lastName"></span><button class="edit-btn" onclick="editField('lastName')">Edit</button></div>
+            <div class="detail-row"><strong>Email:</strong><span id="email"></span><button class="edit-btn" onclick="editField('email')">Edit</button></div>
+            <div class="detail-row"><strong>Date of Birth:</strong><span id="dateOfBirth"></span><button class="edit-btn" onclick="editField('dateOfBirth')">Edit</button></div>
+            <div class="detail-row"><strong>Password:</strong><span id="password"></span><button class="edit-btn" onclick="editField('password')">Edit</button></div>
+        </div>
+        <button onclick="window.location.href='login.html'">Logout</button>
+    </div>
+    
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const userId = urlParams.get('userId');
+        const firstName = urlParams.get('firstName');
+        const lastName = urlParams.get('lastName');
+        const email = urlParams.get('email');
+        const dateOfBirth = urlParams.get('dateOfBirth');
+        const password = decodeURIComponent(urlParams.get('password'));
+        const profilePic = urlParams.get('profilePic');
+        
+        document.getElementById('firstName').innerText = ` ${firstName} `;
+        document.getElementById('lastName').innerText = ` ${lastName} `;
+        document.getElementById('email').innerText = ` ${email} `;
+        document.getElementById('dateOfBirth').innerText = ` ${new Date(dateOfBirth).toLocaleDateString()} `;
+        document.getElementById('password').innerText = ` ${password} `;
+        
+        const profilePicElement = document.getElementById('profilePic');
+        profilePicElement.onerror = function() {
+            profilePicElement.src = 'path_to_default_image.png'; // Placeholder image path
+        };
+        profilePicElement.src = `/uploads/${profilePic}`;
+
+        function editField(field) {
+            const oldValue = document.getElementById(field).innerText.trim();
+            const newValue = prompt(`Edit ${field}:`, oldValue);
+            if (newValue !== null && newValue !== oldValue) {
+                document.getElementById(field).innerText = ` ${newValue} `;
+                updateUserDetails(field, newValue);
+            }
+        }
+
+        async function updateUserDetails(field, newValue) {
+            const response = await fetch(`/api/user/${userId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ [field]: newValue })
+            });
+
+            if (!response.ok) {
+                alert('Error updating user details');
+            }
+        }
+
+        async function uploadProfilePic() {
+            const fileInput = document.getElementById('profilePicInput');
+            const formData = new FormData();
+            formData.append('profilePic', fileInput.files[0]);
+            
+            const response = await fetch(`/api/user/${userId}/profile-pic`, {
+                method: 'PUT',
+                body: formData
+            });
+            
+            if (response.ok) {
+                const { profilePic } = await response.json();
+                profilePicElement.src = `/uploads/${profilePic}`;
+            } else {
+                alert('Error uploading profile picture');
+            }
+        }
+    </script>
+</body>
+</html>
